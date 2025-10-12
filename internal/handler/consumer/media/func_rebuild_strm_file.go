@@ -58,8 +58,7 @@ func (h *handler) walkBuildStrm(ctx context.Context, fid int64, car media.Writer
 	}
 
 	files, err := h.virtualfileService.List(ctx, &virtualfile.ListRequest{
-		ParentId:   ptr.Of(fid),
-		NoPaginate: true,
+		ParentId: ptr.Of(fid),
 	})
 	if err != nil {
 		ctx.Error("查询子文件失败", zap.Error(err), zap.Int64("parent_id", fid))

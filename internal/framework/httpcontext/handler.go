@@ -105,8 +105,13 @@ func loggerHandler() HandlerFunc {
 			// region 发生 Panic 异常发送告警提醒
 			if err := recover(); err != nil {
 				stackInfo := string(debug.Stack())
-				fields = append(fields, zap.String("stack", stackInfo))
-				_ = reqContext.AbortWithError(http.StatusInternalServerError, errors.New(http.StatusText(http.StatusInternalServerError)))
+				fields = append(fields,
+					zap.Any("panic", err),
+					zap.String("stack", stackInfo),
+					zap.String("trace_id", traceId),
+				)
+				reqContext.GetContext().Error("HTTP panic recovery", fields...)
+				_ = reqContext.AbortWithError(http.StatusInternalServerError, errors.New("内部服务器错误"))
 			}
 
 			cost := time.Since(ts).Seconds()

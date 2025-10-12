@@ -18,7 +18,6 @@ type ListRequest struct {
 	CurrentPage int    `form:"currentPage" binding:"omitempty,min=1"`
 	PageSize    int    `form:"pageSize" binding:"omitempty,min=1"`
 	Name        string `form:"name" binding:"omitempty"`
-	NoPaginate  bool   `form:"-"`
 
 	// ExcludeIdList 排除ID
 	ExcludeIdList []int64 `form:"-"`
@@ -54,15 +53,7 @@ func (s *service) List(ctx context.Context, req *ListRequest) ([]*models.Virtual
 		query = query.Order(clause.OrderByColumn{Column: clause.Column{Name: k}})
 	}
 
-	if !req.NoPaginate {
-		if req.CurrentPage <= 0 {
-			req.CurrentPage = 1
-		}
-
-		if req.PageSize <= 0 {
-			req.PageSize = 10
-		}
-
+	if req.CurrentPage > 0 && req.PageSize > 0 {
 		query = query.Offset((req.CurrentPage - 1) * req.PageSize).Limit(req.PageSize)
 	}
 

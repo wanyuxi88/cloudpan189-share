@@ -14,7 +14,7 @@ type Options struct {
 func defaultOptions() *Options {
 	return &Options{
 		WorkerCount:    1,
-		BufferSize:     256,
+		BufferSize:     89120,
 		ProcessTimeout: time.Minute * 30,
 		MaxRetry:       3,
 		RetryDelay:     time.Second * 1,
