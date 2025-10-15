@@ -157,14 +157,17 @@ func (t *taskEngine) worker(workerId string) {
 				return
 			}
 
-			delete(t.pendingTasks, taskInfo.ID)
-
 			t.processMessage(taskInfo, workerId)
 		}
 	}
 }
 
 func (t *taskEngine) processMessage(taskInfo *TaskInfo, workerId string) {
+	// 从待处理任务中删除
+	t.tasksMu.Lock()
+	delete(t.pendingTasks, taskInfo.ID)
+	t.tasksMu.Unlock()
+
 	// 获取处理器
 	t.mu.RLock()
 	processors, ok := t.topicProcessors[taskInfo.Topic]
@@ -355,7 +358,10 @@ func (t *taskEngine) PushMessage(ctx context.Context, topic Topic, payload []byt
 
 	select {
 	case t.taskChan <- taskInfo:
+		t.tasksMu.Lock()
 		t.pendingTasks[taskInfo.ID] = taskInfo
+		t.tasksMu.Unlock()
+
 		if t.options.EnableStats {
 			t.stats.IncrementTotal()
 			t.stats.IncrementPending()
